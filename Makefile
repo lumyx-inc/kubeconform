@@ -16,13 +16,13 @@ local-build-static:
 
 # These only used for development. Release artifacts and docker images are produced by goreleaser.
 docker-test:
-	docker run -t -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform golang:1.24.3 make local-test
+	docker run -t -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform golang:1.27.2@sha256:5bc7f572bbaa98885a3a1fd9c0aa76b59e3e14e8628bfc316bbfd0c701e4818c make local-test
 
 docker-build:
-	docker run -t -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform golang:1.24.3 make local-build
+	docker run -t -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform golang:1.27.2@sha256:5bc7f572bbaa98885a3a1fd9c0aa76b59e3e14e8628bfc316bbfd0c701e4818c make local-build
 
 docker-build-static:
-	docker run -t -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform golang:1.24.3 make local-build-static
+	docker run -t -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform golang:1.27.2@sha256:5bc7f572bbaa98885a3a1fd9c0aa76b59e3e14e8628bfc316bbfd0c701e4818c make local-build-static
 
 build-bats:
 	docker build -t bats -f Dockerfile.bats .
@@ -31,12 +31,13 @@ docker-acceptance: build-bats
 	docker run -t bats -p acceptance.bats
 	docker run --network none -t bats -p acceptance-nonetwork.bats
 
+# The goreleaser image ships an older Go. GOTOOLCHAIN makes it build with go1.27.2.
 goreleaser-build-static:
-	docker run -t -e GOOS=linux -e GOARCH=amd64 -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform goreleaser/goreleaser:v2.9.0 build --clean --single-target --snapshot
+	docker run -t -e GOTOOLCHAIN=go1.27.2 -e GOOS=linux -e GOARCH=amd64 -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform goreleaser/goreleaser:v2.9.0 build --clean --single-target --snapshot
 	cp dist/kubeconform_linux_amd64_v1/kubeconform bin/
 
 release:
-	docker run -e GITHUB_TOKEN -e GIT_OWNER -t -v /var/run/docker.sock:/var/run/docker.sock -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform goreleaser/goreleaser:v2.9.0 release --clean
+	docker run -e GITHUB_TOKEN -e GIT_OWNER -e GOTOOLCHAIN=go1.27.2 -t -v /var/run/docker.sock:/var/run/docker.sock -v $$PWD:/go/src/github.com/lumyx-inc/kubeconform -w /go/src/github.com/lumyx-inc/kubeconform goreleaser/goreleaser:v2.9.0 release --clean
 
 update-deps:
 	go get -u ./...

@@ -15,6 +15,10 @@ builds:
       - amd64
       - arm
       - arm64
+    ignore:
+      # Go 1.26 removed the windows/arm port.
+      - goos: windows
+        goarch: arm
     flags:
       - -trimpath
       - -tags=netgo
