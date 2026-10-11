@@ -2,6 +2,8 @@ module github.com/yannh/kubeconform
 
 go 1.26.0
 
+toolchain go1.27.2
+
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
